@@ -1,0 +1,20 @@
+{
+  "orbiting": [
+    "gambar1.jpg",
+    "gambar2.png",
+    "gambar3.jpg",
+    "gambar4.jpg",
+    "gambar5.jpg",
+    "gambar6.jpg"
+  ],
+  "special": {
+    "front": "special1.jpg",
+    "back": "special2.jpg",
+    "left": "special3.jpg",
+    "right": "special4.jpg"
+  },
+  "music": [
+    "musik.mp3"
+  ],
+  "videos": ["https://tmpfiles.org/dl/33885598/file.mp4"]
+}

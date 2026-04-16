@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Memory Universe — Romantis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:ital,wght@0,200;0,300;1,200;1,300&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  touch-action: none;
+  -webkit-text-size-adjust: none;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+body.dragging {
+  cursor: grabbing;
+}
+
+#c {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none;
+}
+
+#intro, #intro-scan, #intro-txt, #intro-bars, #intro-particles, #intro-wipe {
+  display: none;
+}
+
+#start-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Cinzel', serif;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, #1a0a12 0%, #0a0208 100%);
+}
+
+#start-menu.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#menu-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+  pointer-events: none;
+  animation: fadeSlideUp 1s ease 0.2s both;
+}
+
+.menu-title-wrap {
+  text-align: center;
+}
+
+.menu-title-wrap h1 {
+  font-size: clamp(38px, 11vw, 100px);
+  color: transparent;
+  background: linear-gradient(135deg, #ffeef4 0%, #ffb6c7 35%, #ff8aa3 70%, #ff5a7a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: clamp(6px, 1.8vw, 14px);
+  font-weight: 400;
+  line-height: 1.2;
+  filter: drop-shadow(0 0 25px rgba(255,80,120,0.6));
+  text-shadow: 0 0 15px rgba(255,120,150,0.5);
+}
+
+.menu-title-wrap .title-glow {
+  position: absolute;
+  inset: 0;
+  font-size: clamp(38px, 11vw, 100px);
+  color: rgba(255,100,130,0.2);
+  letter-spacing: clamp(6px, 1.8vw, 14px);
+  font-weight: 400;
+  text-align: center;
+  filter: blur(20px);
+  z-index: -1;
+  animation: titleBreath 4s ease-in-out infinite;
+}
+
+.romantic-sub {
+  font-family: 'Raleway', sans-serif;
+  font-style: italic;
+  font-size: clamp(12px, 2.5vw, 16px);
+  letter-spacing: 2px;
+  color: rgba(255, 220, 230, 0.9);
+  background: transparent;
+  text-shadow: 0 0 8px rgba(255,80,120,0.4);
+  white-space: nowrap;
+}
+
+#play-btn {
+  pointer-events: all;
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.3s ease;
+  margin-top: 0.8rem;
+}
+
+#play-btn:hover {
+  transform: scale(1.08);
+}
+
+#play-btn:active {
+  transform: scale(0.94);
+}
+
+.circular-play {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid rgba(255, 240, 245, 0.95);
+  box-shadow: 0 0 20px rgba(255, 100, 130, 0.5), 0 0 0 1px rgba(255,255,255,0.2) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.35s ease;
+}
+
+.circular-play svg {
+  width: 46px;
+  height: 46px;
+  margin-left: 4px;
+  filter: drop-shadow(0 0 8px rgba(255,80,120,0.8));
+}
+
+.circular-play svg path {
+  fill: none;
+  stroke: #fff5f7;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#play-btn:hover .circular-play {
+  border-color: #ffb0c0;
+  background: rgba(255, 140, 160, 0.15);
+  box-shadow: 0 0 30px rgba(255, 80, 120, 0.7);
+}
+
+#play-btn:hover .circular-play svg path {
+  stroke: #ffeef2;
+}
+
+@keyframes titleBreath {
+  0%, 100% {
+    opacity: 0.6;
+    filter: blur(18px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(22px);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  #play-btn {
+    width: 80px;
+    height: 80px;
+  }
+  .circular-play svg {
+    width: 36px;
+    height: 36px;
+  }
+  .romantic-sub {
+    white-space: normal;
+    font-size: 10px;
+    padding: 0 10px;
+  }
+}
+
+#panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.88);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  touch-action: manipulation;
+}
+
+#panel.on {
+  display: flex;
+}
+
+.panel-inner {
+  position: relative;
+  max-width: min(88vw, 700px);
+  max-height: 88vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: panelIn 0.4s ease;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#panel-img {
+  max-width: 100%;
+  max-height: 80vh;
+  border: 1px solid rgba(255, 80, 100, 0.35);
+  border-radius: 4px;
+  box-shadow: 0 0 80px rgba(200, 20, 40, 0.3), 0 0 200px rgba(150, 10, 20, 0.15);
+}
+
+#panel-close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(200, 20, 40, 0.2);
+  border: 1px solid rgba(255, 80, 100, 0.4);
+  color: rgba(255, 160, 170, 0.9);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  backdrop-filter: blur(8px);
+}
+
+#panel-close:hover {
+  background: rgba(200, 20, 40, 0.4);
+  transform: scale(1.12);
+}
+
+#_lpring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 150, 170, 0.9);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 1;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="start-menu">
+  <div id="menu-content">
+    <div class="menu-title-wrap">
+      <div class="title-glow">MEMORY UNIVERSE</div>
+      <h1>MEMORY UNIVERSE</h1>
+    </div>
+    <div class="romantic-sub">✦ di antara bintang, kau adalah galaksi terindah ✦</div>
+    <button id="play-btn">
+      <div class="circular-play">
+        <svg viewBox="0 0 24 24" width="46" height="46">
+          <path d="M5 3L19 12L5 21V3Z" stroke="white" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </button>
+  </div>
+</div>
+
+<div id="intro"></div>
+<div id="intro-scan"></div>
+<div id="intro-txt">TELEPORTING</div>
+<div id="intro-bars"></div>
+<div id="intro-particles"></div>
+<div id="intro-wipe"></div>
+<canvas id="c"></canvas>
+
+<div id="panel">
+  <div class="panel-inner">
+    <img id="panel-img" src="" alt="">
+    <button id="panel-close">&#10005;</button>
+  </div>
+</div>
+<div id="_lpring"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function lockGameMode() {
+  var PF = { passive: false };
+  document.addEventListener('touchmove', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#panel .panel-inner, #start-menu')) return;
+    e.preventDefault();
+  }, PF);
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, PF);
+  document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, PF);
+  document.addEventListener('gestureend', function(e) { e.preventDefault(); }, PF);
+  window.addEventListener('wheel', function(e) { e.preventDefault(); }, PF);
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  window.addEventListener('keydown', function(e) {
+    if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].indexOf(e.key) >= 0) e.preventDefault();
+  });
+})();
+
+var IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+var MEDIA = 'media/';
+var MUSIC = 'music/';
+
+var globalConfig = null;
+var aud = null, audList = [], audIdx = 0;
+
+var canvas, renderer, scene, camera, planetGroup, coreMesh, midMat, ringTex;
+var orbitCards = [], specialStars = [];
+var sph, tSph;
+var isDrag, isRight, lastM, dragMoved;
+var lPinch, touchDragMoved, _longPressTimer, _longPressFired, _longPressX, _longPressY;
+var raycaster, _mouse;
+var panelEl, panelImg;
+
+function startMusic(list) {
+  audList = list;
+  if (!audList.length) return;
+  playTrack(0);
+}
+
+function playTrack(i) {
+  if (aud) { aud.pause(); aud.src = ''; }
+  audIdx = i % audList.length;
+  aud = new Audio(MUSIC + audList[audIdx]);
+  aud.volume = 0;
+  aud.play().catch(function(e) { console.log("Audio play error:", e); });
+  var v = 0;
+  var fi = setInterval(function() {
+    v = Math.min(1, v + 0.015);
+    if (aud) aud.volume = v;
+    if (v >= 1) clearInterval(fi);
+  }, 80);
+  aud.addEventListener('ended', function() { playTrack(audIdx + 1); });
+}
+
+async function loadConfig() {
+  try {
+    var r = await fetch('img.json');
+    if (r.ok) return await r.json();
+  } catch (e) { }
+  return { orbiting: [], special: { front: '', back: '', left: '', right: '' }, music: [] };
+}
+
+function initThree() {
+  canvas = document.getElementById('c');
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !IS_MOBILE, alpha: false, powerPreference: 'low-power' });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_MOBILE ? 1.2 : 1.8));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.physicallyCorrectLights = true;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.setClearColor(0x000000);
+
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.0012);
+  camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 4000);
+  camera.position.set(0, 25, 90);
+
+  sph = { theta: 0.4, phi: 1.15, r: 180 };
+  tSph = { theta: 0.4, phi: 1.15, r: 180 };
+
+  (function buildStarfield() {
+    var n = 14000;
+    var pos = new Float32Array(n * 3);
+    var col = new Float32Array(n * 3);
+    var COLS = [[1, 0.9, 0.92], [1, 0.85, 0.88], [0.95, 0.85, 0.95], [1, 0.9, 0.85], [1, 0.95, 0.95]];
+    for (var i = 0; i < n; i++) {
+      var r = 120 + Math.random() * 2000;
+      var th = Math.random() * Math.PI * 2;
+      var ph = Math.acos(2 * Math.random() - 1);
+      pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
+      pos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
+      pos[i * 3 + 2] = r * Math.cos(ph);
+      var c = COLS[Math.floor(Math.random() * COLS.length)];
+      col[i * 3] = c[0];
+      col[i * 3 + 1] = c[1];
+      col[i * 3 + 2] = c[2];
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({
+      size: 0.55,
+      sizeAttenuation: true,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9
+    })));
+  })();
+
+  function addNoise(ctx, w, h, amount) {
+    var id = ctx.getImageData(0, 0, w, h);
+    for (var i = 0; i < id.data.length; i += 4) {
+      var n = (Math.random() - 0.5) * amount;
+      id.data[i] = Math.max(0, Math.min(255, id.data[i] + n));
+      id.data[i + 1] = Math.max(0, Math.min(255, id.data[i + 1] + n * 0.9));
+      id.data[i + 2] = Math.max(0, Math.min(255, id.data[i + 2] + n * 0.9));
+    }
+    ctx.putImageData(id, 0, 0);
+  }
+
+  function makePlanetTex() {
+    var c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 256;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#7a0a18';
+    ctx.fillRect(0, 0, 512, 256);
+    for (var s = 0; s < 22; s++) {
+      var x = Math.random() * 512, y = Math.random() * 256, r = 18 + Math.random() * 70;
+      var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(220,40,60,0.55)');
+      g.addColorStop(0.5, 'rgba(160,20,35,0.28)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 512, 256);
+    }
+    for (var v = 0; v < 14; v++) {
+      var x = Math.random() * 512, y = Math.random() * 256, r = 4 + Math.random() * 18;
+      var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(255,120,80,0.45)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 512, 256);
+    }
+    addNoise(ctx, 512, 256, 28);
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  function makeAtmosTex() {
+    var c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 256;
+    var ctx = c.getContext('2d');
+    var g = ctx.createRadialGradient(128, 128, 48, 128, 128, 128);
+    g.addColorStop(0, 'rgba(255,80,100,0.38)');
+    g.addColorStop(0.45, 'rgba(200,30,50,0.20)');
+    g.addColorStop(0.8, 'rgba(120,10,25,0.08)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 256, 256);
+    addNoise(ctx, 256, 256, 14);
+    return new THREE.CanvasTexture(c);
+  }
+
+  planetGroup = new THREE.Group();
+  scene.add(planetGroup);
+
+  var surfTex = makePlanetTex();
+  var coreMat = new THREE.MeshPhongMaterial({
+    map: surfTex,
+    color: 0xffffff,
+    emissive: 0x6b0015,
+    emissiveIntensity: 0.5,
+    shininess: 120,
+    specular: 0xff9090
+  });
+  coreMesh = new THREE.Mesh(new THREE.SphereGeometry(10, 64, 64), coreMat);
+  coreMesh.castShadow = true;
+  coreMesh.receiveShadow = true;
+  planetGroup.add(coreMesh);
+
+  var atmosTex = makeAtmosTex();
+  midMat = new THREE.MeshPhongMaterial({
+    map: atmosTex,
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.28,
+    shininess: 60,
+    emissive: 0x440010,
+    emissiveIntensity: 0.35,
+    depthWrite: false
+  });
+  planetGroup.add(new THREE.Mesh(new THREE.SphereGeometry(10.12, 64, 64), midMat));
+  planetGroup.add(new THREE.Mesh(new THREE.SphereGeometry(11.4, 32, 32), new THREE.MeshPhongMaterial({
+    color: 0xff4060,
+    transparent: true,
+    opacity: 0.08,
+    side: THREE.BackSide,
+    depthWrite: false
+  })));
+  planetGroup.add(new THREE.Mesh(new THREE.SphereGeometry(14, 32, 32), new THREE.MeshBasicMaterial({
+    color: 0xcc1030,
+    transparent: true,
+    opacity: 0.025,
+    side: THREE.BackSide,
+    depthWrite: false
+  })));
+
+  (function buildTextRing() {
+    var TXT = '✦ Memory in Universe ✦  ✦ Kenangan Abadi ✦  ✦  ';
+    var tc = document.createElement('canvas');
+    tc.width = 2048;
+    tc.height = 112;
+    var tx = tc.getContext('2d');
+    tx.clearRect(0, 0, 2048, 112);
+    tx.fillStyle = 'rgba(255,160,180,0.96)';
+    tx.font = 'italic 400 48px Cinzel, Georgia, serif';
+    tx.textBaseline = 'middle';
+    var x = 0;
+    while (x < tc.width * 1.8) {
+      var w = tx.measureText(TXT).width;
+      tx.fillText(TXT, x, 56);
+      x += w;
+    }
+    ringTex = new THREE.CanvasTexture(tc);
+    ringTex.wrapS = THREE.RepeatWrapping;
+    var rg = new THREE.RingGeometry(16, 20, 256, 1);
+    var pa = rg.attributes.position, ua = rg.attributes.uv;
+    for (var i = 0; i < pa.count; i++) {
+      var px = pa.getX(i), py = pa.getY(i);
+      var ang = (Math.atan2(py, px) / (Math.PI * 2) + 1) % 1;
+      var rad = Math.sqrt(px * px + py * py);
+      ua.setXY(i, ang, (rad - 16) / 4);
+    }
+    ua.needsUpdate = true;
+    var ring = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({
+      map: ringTex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.92,
+      depthWrite: false
+    }));
+    ring.rotation.x = Math.PI / 2.4;
+    planetGroup.add(ring);
+    [[15, 0.26], [20.5, 0.16], [22, 0.08]].forEach(function(pair) {
+      var r = pair[0], op = pair[1], pts = [];
+      for (var j = 0; j <= 256; j++) {
+        var a = (j / 256) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+      }
+      var l = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color: 0xff7080, transparent: true, opacity: op })
+      );
+      l.rotation.x = Math.PI / 2.4;
+      planetGroup.add(l);
+    });
+  })();
+
+  var sunL = new THREE.PointLight(0xffcccc, 4, 1000);
+  sunL.position.set(100, 80, 80);
+  sunL.castShadow = true;
+  sunL.shadow.mapSize.set(512, 512);
+  sunL.shadow.radius = 3;
+  scene.add(sunL);
+  scene.add(new THREE.AmbientLight(0x220008, 2.5));
+  var rim = new THREE.DirectionalLight(0xff5060, 1.2);
+  rim.position.set(-90, 50, -100);
+  scene.add(rim);
+  var fill = new THREE.PointLight(0x330008, 1.8, 400);
+  fill.position.set(-70, -50, 60);
+  scene.add(fill);
+  scene.add(new THREE.HemisphereLight(0xff9966, 0x1a0008, 0.18));
+
+  panelEl = document.getElementById('panel');
+  panelImg = document.getElementById('panel-img');
+
+  function closePanel() { panelEl.classList.remove('on'); panelImg.src = ''; }
+  function wireClose(el, fn) {
+    el.addEventListener('click', fn);
+    el.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); fn(); }, { passive: false });
+  }
+  wireClose(document.getElementById('panel-close'), closePanel);
+  panelEl.addEventListener('click', function(e) { if (e.target === panelEl) closePanel(); });
+  panelEl.addEventListener('touchend', function(e) { if (e.target === panelEl) { e.preventDefault(); closePanel(); } }, { passive: false });
+
+  raycaster = new THREE.Raycaster();
+  _mouse = new THREE.Vector2();
+
+  var _tapCount = 0, _tapTimer = null, _tapCard = null, _tapStar = null;
+  var TAP_WINDOW = 300;
+
+  function flyToCard(card) {
+    var p = card.position, len = p.length();
+    if (len < 0.01) return;
+    tSph.r = 22;
+    tSph.theta = Math.atan2(p.x, p.z);
+    tSph.phi = Math.acos(Math.max(-1, Math.min(1, p.y / len)));
+    clamp();
+  }
+
+  function processTap(ex, ey) {
+    if (panelEl.classList.contains('on')) return;
+    var star = getSpecialStar(ex, ey);
+    var card = star ? null : getOrbitCard(ex, ey);
+    if (!star && !card) { _tapCount = 0; clearTimeout(_tapTimer); _tapCard = null; _tapStar = null; return; }
+    if ((star && star !== _tapStar) || (card && card !== _tapCard)) { _tapCount = 0; clearTimeout(_tapTimer); }
+    if (_tapCount >= 3) return;
+    _tapCount++;
+    _tapStar = star || null;
+    _tapCard = card || null;
+    clearTimeout(_tapTimer);
+    _tapTimer = setTimeout(function() {
+      var n = _tapCount, s = _tapStar, c = _tapCard;
+      _tapCount = 0; _tapStar = null; _tapCard = null;
+      if (n === 2 && s) { openPanel(s.userData.src); }
+      else if (n === 3 && c) { flyToCard(c); }
+      else if (n === 2 && c) { openPanel(c.userData.photoSrc || c.userData.src); }
+    }, TAP_WINDOW);
+  }
+
+  function openPanel(src) {
+    if (!src) return;
+    panelImg.src = src;
+    panelEl.classList.add('on');
+  }
+
+  function getOrbitCard(ex, ey) {
+    var meshes = [];
+    orbitCards.forEach(function(g) { g.traverse(function(c) { if (c.isMesh && c.userData._isHitbox) meshes.push(c); }); });
+    var hits = raycast(ex, ey, meshes);
+    if (!hits.length) return null;
+    return hits[0].object.userData._parentGroup || null;
+  }
+
+  function getSpecialStar(ex, ey) {
+    var meshes = [];
+    specialStars.forEach(function(g) { g.traverse(function(c) { if (c.isMesh) meshes.push(c); }); });
+    var hits = raycast(ex, ey, meshes);
+    if (!hits.length) return null;
+    var o = hits[0].object;
+    while (o) { if (o.userData && o.userData.src) return o; o = o.parent; }
+    return null;
+  }
+
+  function raycast(ex, ey, objects) {
+    _mouse.set((ex / innerWidth) * 2 - 1, -(ey / innerHeight) * 2 + 1);
+    raycaster.setFromCamera(_mouse, camera);
+    return raycaster.intersectObjects(objects, false);
+  }
+
+  function clamp() {
+    tSph.phi = Math.max(0.02, Math.min(Math.PI - 0.02, tSph.phi));
+    tSph.r = Math.max(14, Math.min(600, tSph.r));
+  }
+
+  isDrag = false; isRight = false; lastM = { x: 0, y: 0 }; dragMoved = false;
+
+  canvas.addEventListener('mousedown', function(e) {
+    if (panelEl.classList.contains('on')) return;
+    isDrag = true; dragMoved = false; isRight = (e.button === 2);
+    lastM = { x: e.clientX, y: e.clientY };
+    document.body.classList.add('dragging');
+  });
+  window.addEventListener('mouseup', function() { isDrag = false; dragMoved = false; document.body.classList.remove('dragging'); });
+  window.addEventListener('mousemove', function(e) {
+    if (!isDrag) return;
+    var dx = e.clientX - lastM.x, dy = e.clientY - lastM.y;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+    lastM = { x: e.clientX, y: e.clientY };
+    if (!isRight) { tSph.theta -= dx * 0.005; tSph.phi -= dy * 0.005; } else { tSph.r += dy * 0.28; }
+    clamp();
+  });
+  canvas.addEventListener('click', function(e) { if (!dragMoved) processTap(e.clientX, e.clientY); });
+  canvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var s = Math.max(0.05, tSph.r * 0.001) * 80;
+    tSph.r += e.deltaY * s * 0.001;
+    clamp();
+  }, { passive: false });
+  canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  canvas.addEventListener('mousemove', function(e) {
+    if (isDrag) return;
+    var meshes = [];
+    specialStars.forEach(function(g) { g.traverse(function(c) { if (c.isMesh) meshes.push(c); }); });
+    orbitCards.forEach(function(g) { g.traverse(function(c) { if (c.isMesh && c.userData._isHitbox) meshes.push(c); }); });
+    document.body.style.cursor = raycast(e.clientX, e.clientY, meshes).length ? 'pointer' : 'grab';
+  });
+
+  lPinch = null; touchDragMoved = false;
+  _longPressTimer = null; _longPressFired = false; _longPressX = 0; _longPressY = 0;
+
+  function cancelLongPress() { clearTimeout(_longPressTimer); _longPressTimer = null; }
+  function showLongPressRing(x, y) {
+    var ring = document.getElementById('_lpring'); if (!ring) return;
+    ring.style.left = x + 'px'; ring.style.top = y + 'px';
+    ring.style.transform = 'translate(-50%,-50%) scale(0)'; ring.style.opacity = '1';
+    requestAnimationFrame(function() { ring.style.transform = 'translate(-50%,-50%) scale(1.5)'; ring.style.opacity = '0'; });
+  }
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault(); e.stopPropagation(); cancelLongPress(); _longPressFired = false;
+    if (e.touches.length === 1) {
+      isDrag = true; touchDragMoved = false;
+      var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+      lastM = { x: tx, y: ty }; _longPressX = tx; _longPressY = ty;
+      _longPressTimer = setTimeout(function() {
+        if (!touchDragMoved) {
+          var card = getOrbitCard(_longPressX, _longPressY);
+          if (card) { _longPressFired = true; showLongPressRing(_longPressX, _longPressY); flyToCard(card); }
+        }
+      }, 500);
+    }
+    if (e.touches.length === 2) {
+      cancelLongPress(); isDrag = false;
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      lPinch = Math.sqrt(dx * dx + dy * dy);
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    if (e.touches.length === 1 && isDrag) {
+      var dx = e.touches[0].clientX - lastM.x, dy = e.touches[0].clientY - lastM.y;
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) { touchDragMoved = true; cancelLongPress(); }
+      tSph.theta -= dx * 0.005; tSph.phi -= dy * 0.005;
+      lastM = { x: e.touches[0].clientX, y: e.touches[0].clientY }; clamp();
+    }
+    if (e.touches.length === 2 && lPinch != null) {
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      tSph.r += (lPinch - d) * 0.2; lPinch = d; clamp();
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchend', function(e) {
+    e.preventDefault(); e.stopPropagation(); cancelLongPress();
+    var wasDrag = touchDragMoved, wasFired = _longPressFired;
+    if (e.touches.length === 0) {
+      isDrag = false; lPinch = null; touchDragMoved = false; _longPressFired = false;
+      if (!wasDrag && !wasFired && e.changedTouches.length === 1)
+        processTap(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }
+    if (e.touches.length === 1) lPinch = null;
+  }, { passive: false });
+  canvas.addEventListener('touchcancel', function(e) {
+    e.preventDefault(); cancelLongPress(); isDrag = false; lPinch = null; touchDragMoved = false; _longPressFired = false;
+  }, { passive: false });
+}
+
+function spawnOrbitCard(name, idx, total) {
+  var ORBIT_BANDS = [
+    { radius: 55, baseInc: 0.12, baseSpeed: 0.00055 },
+    { radius: 75, baseInc: -0.22, baseSpeed: 0.00042 },
+    { radius: 98, baseInc: 0.32, baseSpeed: 0.00030 },
+    { radius: 122, baseInc: -0.18, baseSpeed: 0.00021 },
+    { radius: 148, baseInc: 0.25, baseSpeed: 0.00014 }
+  ];
+
+  function makeOrbitParams(idx, total) {
+    var bandIdx = idx % ORBIT_BANDS.length, band = ORBIT_BANDS[bandIdx];
+    var slotInBand = Math.floor(idx / ORBIT_BANDS.length);
+    var totalInBand = Math.ceil(total / ORBIT_BANDS.length);
+    return {
+      radius: band.radius + (Math.random() - 0.5) * 7,
+      inc: band.baseInc + (Math.random() - 0.5) * 0.28,
+      tiltZ: (Math.random() - 0.5) * 0.18,
+      speed: band.baseSpeed * (0.75 + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1),
+      startAngle: (slotInBand / totalInBand) * Math.PI * 2 + bandIdx * 0.62 + (Math.random() - 0.5) * 0.3
+    };
+  }
+
+  function createOrbitLine(radius, inc, tiltZ, opacity) {
+    var pts = [];
+    for (var i = 0; i <= 180; i++) {
+      var a = (i / 180) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+    }
+    var l = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({ color: 0xff3040, transparent: true, opacity: opacity })
+    );
+    l.rotation.x = inc; l.rotation.z = tiltZ; scene.add(l); return l;
+  }
+
+  var op = makeOrbitParams(idx, total);
+  var ud = {
+    op: op, angle: op.startAngle,
+    floatOffset: Math.random() * Math.PI * 2,
+    floatSpeed: 0.18 + Math.random() * 0.28,
+    isVid: false, src: MEDIA + name, photoSrc: MEDIA + name
+  };
+  createOrbitLine(op.radius, op.inc, op.tiltZ, 0.055 + Math.random() * 0.04);
+
+  function makeBackTexN(asp) {
+    var bw = 256, bh = Math.round(256 / asp);
+    var bc = document.createElement('canvas'); bc.width = bw; bc.height = bh;
+    var bx = bc.getContext('2d');
+    var bg = bx.createLinearGradient(0, 0, bw, bh);
+    bg.addColorStop(0, '#111111'); bg.addColorStop(1, '#222222');
+    bx.fillStyle = bg; bx.fillRect(0, 0, bw, bh);
+    bx.strokeStyle = 'rgba(180,180,200,0.2)'; bx.lineWidth = 2; bx.strokeRect(2, 2, bw - 4, bh - 4);
+    bx.strokeStyle = 'rgba(150,150,170,0.05)'; bx.lineWidth = 0.6;
+    for (var lx = 20; lx < bw; lx += 20) { bx.beginPath(); bx.moveTo(lx, 0); bx.lineTo(lx, bh); bx.stroke(); }
+    for (var ly = 20; ly < bh; ly += 20) { bx.beginPath(); bx.moveTo(0, ly); bx.lineTo(bw, ly); bx.stroke(); }
+    var id = bx.getImageData(0, 0, bw, bh);
+    for (var i = 0; i < id.data.length; i += 4) {
+      var n = (Math.random() - 0.5) * 12;
+      id.data[i] = Math.max(0, Math.min(255, id.data[i] + n));
+      id.data[i + 1] = Math.max(0, Math.min(255, id.data[i + 1] + n * 0.9));
+      id.data[i + 2] = Math.max(0, Math.min(255, id.data[i + 2] + n * 0.9));
+    }
+    bx.putImageData(id, 0, 0);
+    return new THREE.CanvasTexture(bc);
+  }
+
+  function buildGroup(frontTex, asp, clickable) {
+    var BASE = 4, W = asp >= 1 ? BASE : BASE * asp, H = asp >= 1 ? BASE / asp : BASE;
+    var g = new THREE.Group();
+    if (clickable) {
+      var hitM = new THREE.Mesh(
+        new THREE.PlaneGeometry(W * 3, H * 3),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+      );
+      hitM.userData._isHitbox = true; g.add(hitM);
+      g.add(new THREE.Mesh(new THREE.PlaneGeometry(W + 0.8, H + 0.8), new THREE.MeshBasicMaterial({
+        color: 0xff2040, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false
+      })));
+      g.add(new THREE.Mesh(new THREE.PlaneGeometry(W + 0.22, H + 0.22), new THREE.MeshBasicMaterial({
+        color: 0xff8090, transparent: true, opacity: 0.10, side: THREE.DoubleSide
+      })));
+    }
+    var backMat = new THREE.MeshBasicMaterial({ map: makeBackTexN(asp), side: THREE.FrontSide });
+    if (!clickable) backMat.transparent = true;
+    var backM = new THREE.Mesh(new THREE.PlaneGeometry(W, H), backMat);
+    backM.rotation.y = Math.PI; backM.position.z = -0.015; g.add(backM);
+    var frontM = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({
+      map: frontTex, side: THREE.FrontSide
+    }));
+    frontM.position.z = 0.015; g.add(frontM);
+    g.userData = ud;
+    g.traverse(function(c) {
+      if (c.isMesh) { c.userData.photoSrc = ud.photoSrc; c.userData.isVid = false; c.userData.src = ud.src; c.userData._parentGroup = g; }
+    });
+    g.scale.set(0, 0, 0); scene.add(g); orbitCards.push(g);
+    var pt = 0;
+    (function anim() {
+      pt += 0.04;
+      var s = Math.min(1, pt < 0.5 ? 2 * pt * pt : -1 + (4 - 2 * pt) * pt);
+      g.scale.setScalar(s);
+      if (pt < 1.06) requestAnimationFrame(anim); else g.scale.setScalar(1);
+    })();
+  }
+
+  var loader = new THREE.TextureLoader();
+  loader.load(MEDIA + name, function(tex) {
+    tex.minFilter = THREE.LinearFilter;
+    buildGroup(tex, tex.image.width / tex.image.height, true);
+  }, undefined, function() {
+    var pc = document.createElement('canvas'); pc.width = 128; pc.height = 128;
+    var px = pc.getContext('2d'); px.clearRect(0, 0, 128, 128);
+    var fallbackTex = new THREE.CanvasTexture(pc);
+    fallbackTex.transparent = true;
+    buildGroup(fallbackTex, 1, false);
+  });
+}
+
+function spawnSpecialStars(cfg) {
+  var SPECIAL_POS = [
+    { key: 'front', pos: new THREE.Vector3(0, 0, 55) },
+    { key: 'back', pos: new THREE.Vector3(0, 0, -55) },
+    { key: 'left', pos: new THREE.Vector3(-55, 0, 0) },
+    { key: 'right', pos: new THREE.Vector3(55, 0, 0) }
+  ];
+  var sp = cfg.special || {};
+  var spDefs = [
+    { key: 'front', src: sp.front || '' },
+    { key: 'back', src: sp.back || '' },
+    { key: 'left', src: sp.left || '' },
+    { key: 'right', src: sp.right || '' }
+  ];
+  SPECIAL_POS.forEach(function(pd, i) {
+    if (!spDefs[i].src) return;
+    var pos = pd.pos, photoSrc = spDefs[i].src;
+    var group = new THREE.Group(); group.position.copy(pos);
+    var starGroup = new THREE.Group();
+    var TIPS = 4, RAD = 2.2, INNER = 0.55, DEPTH = 1.2;
+    var starShape = new THREE.Shape();
+    for (var i2 = 0; i2 < TIPS * 2; i2++) {
+      var angle = (i2 / TIPS / 2) * Math.PI * 2 - Math.PI / 2, r = i2 % 2 === 0 ? RAD : INNER;
+      if (i2 === 0) starShape.moveTo(Math.cos(angle) * r, Math.sin(angle) * r);
+      else starShape.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+    }
+    starShape.closePath();
+    var extGeo = new THREE.ExtrudeGeometry(starShape, {
+      depth: DEPTH, bevelEnabled: true, bevelSize: 0.15, bevelThickness: 0.15, bevelSegments: 3
+    });
+    var starMesh = new THREE.Mesh(extGeo, new THREE.MeshPhongMaterial({
+      color: 0xffffff, emissive: 0x8888ff, emissiveIntensity: 0.5,
+      shininess: 120, specular: 0xffffff, transparent: true, opacity: 0.92
+    }));
+    starMesh.castShadow = true; starMesh.position.z = -DEPTH / 2; starGroup.add(starMesh);
+    var glowCvs = document.createElement('canvas'); glowCvs.width = 256; glowCvs.height = 256;
+    var gc = glowCvs.getContext('2d');
+    var grd = gc.createRadialGradient(128, 128, 10, 128, 128, 128);
+    grd.addColorStop(0, 'rgba(180,200,255,0.6)');
+    grd.addColorStop(0.3, 'rgba(120,160,255,0.3)');
+    grd.addColorStop(0.7, 'rgba(80,100,255,0.1)');
+    grd.addColorStop(1, 'transparent');
+    gc.fillStyle = grd; gc.fillRect(0, 0, 256, 256);
+    starGroup.add(new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(glowCvs), transparent: true, opacity: 0.8, depthWrite: false, side: THREE.DoubleSide
+    })));
+    var ptLight = new THREE.PointLight(0x8899ff, 1.5, 35); starGroup.add(ptLight);
+    group.add(starGroup);
+    group.userData = {
+      key: pd.key, src: MEDIA + photoSrc, isVid: false,
+      starGroup: starGroup, ptLight: ptLight,
+      glowPhase: Math.random() * Math.PI * 2, clickable: true, baseY: pos.y
+    };
+    group.traverse(function(c) { if (c.isMesh) { c.userData.src = MEDIA + photoSrc; c.userData.isVid = false; } });
+    scene.add(group); specialStars.push(group);
+  });
+}
+
+function updateOrbitCards(t) {
+  orbitCards.forEach(function(g) {
+    var d = g.userData, op = d.op;
+    d.angle += op.speed;
+    var r = op.radius, inc = op.inc, tz = op.tiltZ;
+    var cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
+    var x0 = cosA * r, z0 = sinA * r, y0 = sinA * r * Math.sin(inc), z1 = z0 * Math.cos(inc);
+    var x1 = x0 * Math.cos(tz) - y0 * Math.sin(tz), y1 = x0 * Math.sin(tz) + y0 * Math.cos(tz);
+    var yFloat = Math.sin(t * d.floatSpeed + d.floatOffset) * 0.8;
+    g.position.set(x1, y1 + yFloat, z1);
+    g.lookAt(camera.position);
+  });
+}
+
+function updateSpecials(t) {
+  specialStars.forEach(function(g) {
+    var d = g.userData, sg = d.starGroup;
+    sg.rotation.z = t * 0.5 + d.glowPhase;
+    sg.rotation.x = Math.sin(t * 0.3 + d.glowPhase) * 0.3;
+    var cycle = 0.5 + 0.5 * Math.sin(t * 1.2 + d.glowPhase);
+    d.ptLight.color.setRGB((180 + cycle * 75) / 255, (200 + cycle * 55) / 255, 1);
+    d.ptLight.intensity = 1.0 + cycle * 1.5;
+    g.position.y = d.baseY + Math.sin(t * 0.4 + d.glowPhase) * 2.5;
+  });
+}
+
+var _zoomOutActive = false;
+var _zoomOutStart = 0;
+var _zoomOutFrom = 12;
+var _zoomOutTo = 180;
+
+function runIntroSequence() {
+  var intro = document.getElementById('intro');
+  var scan = document.getElementById('intro-scan');
+  var txt = document.getElementById('intro-txt');
+  var barsEl = document.getElementById('intro-bars');
+  var partsEl = document.getElementById('intro-particles');
+  var wipe = document.getElementById('intro-wipe');
+
+  intro.style.display = 'block'; scan.style.display = 'block'; txt.style.display = 'block';
+  barsEl.style.display = 'block'; partsEl.style.display = 'block'; wipe.style.display = 'block';
+  intro.style.background = '#000'; intro.style.opacity = '1';
+  wipe.style.opacity = '1'; wipe.style.transform = 'scale(1)';
+
+  sph.r = 12; sph.theta = 0.4; sph.phi = 1.15;
+  tSph.r = 12; tSph.theta = 0.4; tSph.phi = 1.15;
+
+  setTimeout(function() {
+    txt.style.opacity = '1';
+    txt.style.animation = 'glitchTxtLand 0.12s infinite';
+    txt.textContent = 'TELEPORTING';
+    txt.style.fontSize = 'clamp(22px,5vw,44px)';
+    txt.style.color = '#fff';
+    txt.style.textShadow = '2px 0 #ff0066, -2px 0 #00ffcc';
+  }, 80);
+
+  setTimeout(function() {
+    scan.style.transition = 'opacity 0.2s'; scan.style.opacity = '1';
+    var flicker = 0;
+    var fl = setInterval(function() {
+      flicker++;
+      var r = flicker % 2 === 0
+        ? 'rgba(255,0,40,' + (Math.random() * 0.45 + 0.2) + ')'
+        : 'rgba(0,' + Math.floor(Math.random() * 60) + ',' + Math.floor(Math.random() * 100) + ',' + (Math.random() * 0.3) + ')';
+      intro.style.background = r;
+      if (flicker >= 8) clearInterval(fl);
+    }, 55);
+  }, 400);
+
+  setTimeout(function() {
+    barsEl.style.opacity = '1';
+    for (var b = 0; b < 12; b++) {
+      (function(i) {
+        var bar = document.createElement('div'); bar.className = 'ibar';
+        bar.style.top = (Math.random() * 100) + '%';
+        bar.style.height = (Math.random() * 6 + 1) + 'px';
+        bar.style.background = Math.random() < 0.5 ? 'rgba(0,255,200,0.7)' : 'rgba(255,0,100,0.6)';
+        bar.style.animation = 'barSlide ' + (Math.random() * 180 + 120) + 'ms ' + (i * 40) + 'ms linear forwards';
+        barsEl.appendChild(bar);
+      })(b);
+    }
+  }, 700);
+
+  setTimeout(function() {
+    txt.textContent = 'SIGNAL ACQUIRED';
+    txt.style.fontSize = 'clamp(14px,3vw,28px)';
+    txt.style.color = '#00ffcc';
+    txt.style.textShadow = '0 0 20px #00ffcc, 0 0 40px rgba(0,255,200,0.5)';
+    txt.style.animation = 'none';
+    txt.style.letterSpacing = '8px';
+  }, 900);
+
+  setTimeout(function() {
+    partsEl.style.opacity = '1';
+    for (var p = 0; p < 60; p++) {
+      (function() {
+        var part = document.createElement('div'); part.className = 'ipart';
+        part.style.left = '50%'; part.style.top = '50%';
+        var angle = Math.random() * Math.PI * 2, dist = 40 + Math.random() * 120;
+        part.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        part.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        var colors = ['#fff', '#00ffcc', '#ff0066', '#ffcc00', '#ff88cc'];
+        part.style.background = colors[Math.floor(Math.random() * colors.length)];
+        var sz = (Math.random() * 3 + 1.5) + 'px'; part.style.width = sz; part.style.height = sz;
+        part.style.boxShadow = '0 0 4px ' + part.style.background;
+        part.style.animation = 'partBurst ' + (Math.random() * 400 + 300) + 'ms ease-out ' + (Math.random() * 200) + 'ms forwards';
+        partsEl.appendChild(part);
+      })();
+    }
+  }, 1200);
+
+  setTimeout(function() {
+    txt.style.transition = 'opacity 0.3s'; txt.style.opacity = '0';
+    scan.style.transition = 'opacity 0.3s'; scan.style.opacity = '0';
+    intro.style.transition = 'opacity 0.4s'; intro.style.opacity = '0';
+  }, 1500);
+
+  setTimeout(function() {
+    wipe.style.transition = 'clip-path 0.7s cubic-bezier(0.7,0,0.3,1), opacity 0.1s';
+    wipe.style.clipPath = 'circle(0% at 50% 50%)';
+  }, 1600);
+
+  setTimeout(function() {
+    intro.style.display = 'none'; scan.style.display = 'none';
+    txt.style.display = 'none'; barsEl.style.display = 'none';
+    partsEl.style.display = 'none'; wipe.style.display = 'none';
+
+    _zoomOutFrom = 12;
+    _zoomOutTo = 180;
+    sph.r = _zoomOutFrom; tSph.r = _zoomOutFrom;
+    _zoomOutStart = performance.now();
+    _zoomOutActive = true;
+  }, 2400);
+}
+
+function animate(ts) {
+  requestAnimationFrame(animate);
+  var t = ts * 0.001;
+
+  function lerp(a, b, f) { return a + (b - a) * f; }
+
+  if (_zoomOutActive) {
+    var elapsed = (ts - _zoomOutStart) / 1000;
+    var dur = 2.8;
+    var prog = Math.min(1, elapsed / dur);
+    var ease = 1 - Math.pow(1 - prog, 3);
+    sph.r = lerp(_zoomOutFrom, _zoomOutTo, ease);
+    tSph.r = sph.r;
+    if (prog >= 1) _zoomOutActive = false;
+  }
+
+  sph.theta = lerp(sph.theta, tSph.theta, 0.08);
+  sph.phi = lerp(sph.phi, tSph.phi, 0.08);
+  if (!_zoomOutActive) sph.r = lerp(sph.r, tSph.r, 0.08);
+
+  camera.position.set(
+    sph.r * Math.sin(sph.phi) * Math.sin(sph.theta),
+    sph.r * Math.cos(sph.phi),
+    sph.r * Math.sin(sph.phi) * Math.cos(sph.theta)
+  );
+  camera.lookAt(0, 0, 0);
+
+  planetGroup.rotation.y = t * 0.065;
+  coreMesh.rotation.y = t * 0.11;
+  midMat.emissiveIntensity = 0.3 + Math.sin(t * 1.5) * 0.08;
+  if (ringTex) { ringTex.offset.x = (t * 0.013) % 1; ringTex.needsUpdate = true; }
+
+  updateOrbitCards(t);
+  updateSpecials(t);
+  renderer.render(scene, camera);
+}
+
+function startExperience(cfg) {
+  if (cfg.music && cfg.music.length) startMusic(cfg.music);
+
+  var orbFiles = cfg.orbiting || [];
+  if (orbFiles.length > 0) {
+    var repeat = 1;
+    if (orbFiles.length < 15) repeat = Math.ceil(20 / orbFiles.length);
+    var expanded = [];
+    for (var rep = 0; rep < repeat; rep++) {
+      var shuffled = orbFiles.slice().sort(function() { return Math.random() - 0.5; });
+      expanded = expanded.concat(shuffled);
+    }
+    expanded.forEach(function(name, i) {
+      setTimeout(function() { spawnOrbitCard(name, i, expanded.length); }, i * 80);
+    });
+  }
+
+  spawnSpecialStars(cfg);
+  runIntroSequence();
+}
+
+(async function() {
+  globalConfig = await loadConfig();
+  initThree();
+  animate(0);
+  var playBtn = document.getElementById('play-btn');
+  var menuDiv = document.getElementById('start-menu');
+  playBtn.addEventListener('click', function() {
+    menuDiv.classList.add('hide');
+    setTimeout(function() {
+      menuDiv.style.display = 'none';
+      startExperience(globalConfig);
+    }, 1200);
+  });
+})();
+</script>
+</body>
+</html>
